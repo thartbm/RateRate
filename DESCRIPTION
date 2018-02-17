@@ -1,11 +1,17 @@
 Package: RateRate
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Evaluate and Fit The Two-Rate Model of Motor Learning
 Version: 0.1.0
-Author: Who wrote it
+Authors@R: c(person("Marius", "'t Hart", email = "thartbm@gmail.com",
+                  role = c("aut", "cre")),
+             person("Jennifer", "Ruttle", email = "jennruttle@gmail.com", role = "aut"),
+             person("Denise", "Henriques", email = "deniseh@yorku.ca", role = "aut"))
 Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Description: RateRate provides functions to evaluate the two-rate 
+    model as described by Maurice Smith et al. (2006), as well as
+    an error-function that can be used for fitting the model and a 
+    function that first does a grid search, picks the best 5 fits and
+    optimizes those, minimizing square errors.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
