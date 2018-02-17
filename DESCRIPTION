@@ -1,7 +1,7 @@
 Package: RateRate
 Type: Package
 Title: Evaluate and Fit The Two-Rate Model of Motor Learning
-Version: 0.1.0
+Version: 0.0.0.9000
 Authors@R: c(person("Marius", "'t Hart", email = "thartbm@gmail.com",
                   role = c("aut", "cre")),
              person("Jennifer", "Ruttle", email = "jennruttle@gmail.com", role = "aut"),
