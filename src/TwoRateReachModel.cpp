@@ -103,105 +103,103 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
 
 }
 
-// the function below is not working correctly, so it should not be used:
-// (it does increase the speed a bit, so it might be worth fixing it)
 
-// // [[Rcpp::export]]
-// double twoRateReachModelErrors(NumericVector par, NumericVector reaches, NumericVector rotations) {
-//
-//   // first we check if the input parameters make sense
-//   // if not, we return infinity:
-//   double inf = std::numeric_limits<double>::infinity();
-//
-//
-//   // only evaluate rates if both its slow and fast version exist:
-//   // also check if each parameter is within bounds
-//   bool checkR = TRUE;
-//   bool checkL = TRUE;
-//   if(par.containsElementNamed("Rs")==FALSE) {
-//     checkR = FALSE;
-//   } else {
-//     if (par["Rs"] > 1.0) {
-//       return(inf);
-//     }
-//     if (par["Rs"] < 0.0) {
-//       return(inf);
-//     }
-//   }
-//   if(par.containsElementNamed("Rf")==FALSE) {
-//     checkR = FALSE;
-//   } else {
-//     if (par["Rf"] > 1.0) {
-//       return(inf);
-//     }
-//     if (par["Rf"] < 0.0) {
-//       return(inf);
-//     }
-//   }
-//   if(par.containsElementNamed("Ls")==FALSE) {
-//     checkL = FALSE;
-//   } else {
-//     if (par["Ls"] > 1.0) {
-//       return(inf);
-//     }
-//     if (par["Ls"] < 0.0) {
-//       return(inf);
-//     }
-//   }
-//   if(par.containsElementNamed("Lf")==FALSE) {
-//     checkL = FALSE;
-//   } else {
-//     if (par["Lf"] > 1.0) {
-//       return(inf);
-//     }
-//     if (par["Lf"] < 0.0) {
-//       return(inf);
-//     }
-//   }
-//
-//   if (checkR) {
-//     // fast retention should not be larger than slow retention
-//     double Rf = par["Rf"];
-//     double Rs = par["Rs"];
-//     if (Rf > Rs) {
-//       return(inf);
-//     }
-//   }
-//   if (checkL) {
-//     // slow learning should not be larger than fast learning
-//     double Ls = par["Ls"];
-//     double Lf = par["Lf"];
-//     if (Ls > Lf) {
-//       return(inf);
-//     }
-//   }
-//
-//   // parameters checked, we can now evaluate the model with the parameters
-//
-//   // get all parameters ready to be passed on to the evaluation function,
-//   // in particular, the non-fit parameters need to be added to the vector
-//   // unfortuntely, this is hard in C++ (or rather, when using the Rccp
-//   // NumericVector class with named elements) so this is a lot of code:
-//   NumericVector epar = par;
-//   // double nfpNo = nonfitpar.size();
-//   // double  fpNo = par.size();
-//   // CharacterVector nfpNames = nonfitpar.attr("names");
-//   // CharacterVector eparNames = par.attr("names");
-//   // for(int idx = 0; idx < nfpNo; ++idx) {
-//   //   epar.push_back( nonfitpar[idx] );
-//   //   eparNames.push_back( nfpNames[idx] );
-//   // }
-//   // epar.attr("names") = eparNames;
-//
-//   // evaluate the model with these parameters:
-//   DataFrame model = twoRateReachModel(epar, rotations);
-//   // get only the total model output
-//   NumericVector total = model["total"];
-//   // these are the errors of the model in predicting the behavior for each trial:
-//   NumericVector errors = reaches - total;
-//   // now we square and then sum those errors:
-//   double sumerrors2 = std::inner_product(errors.begin(), errors.end(), errors.begin(), 0.0);
-//   // and return that, divided by the number of trials, the MSE:
-//   return(sumerrors2/rotations.size());
-//
-// }
+// [[Rcpp::export]]
+double twoRateReachModelErrors(NumericVector par, NumericVector reaches, NumericVector rotations) {
+
+  // first we check if the input parameters make sense
+  // if not, we return infinity:
+  double inf = std::numeric_limits<double>::infinity();
+
+
+  // only evaluate rates if both its slow and fast version exist:
+  // also check if each parameter is within bounds
+  bool checkR = TRUE;
+  bool checkL = TRUE;
+  if(par.containsElementNamed("Rs")==FALSE) {
+    checkR = FALSE;
+  } else {
+    if (par["Rs"] > 1.0) {
+      return(inf);
+    }
+    if (par["Rs"] < 0.0) {
+      return(inf);
+    }
+  }
+  if(par.containsElementNamed("Rf")==FALSE) {
+    checkR = FALSE;
+  } else {
+    if (par["Rf"] > 1.0) {
+      return(inf);
+    }
+    if (par["Rf"] < 0.0) {
+      return(inf);
+    }
+  }
+  if(par.containsElementNamed("Ls")==FALSE) {
+    checkL = FALSE;
+  } else {
+    if (par["Ls"] > 1.0) {
+      return(inf);
+    }
+    if (par["Ls"] < 0.0) {
+      return(inf);
+    }
+  }
+  if(par.containsElementNamed("Lf")==FALSE) {
+    checkL = FALSE;
+  } else {
+    if (par["Lf"] > 1.0) {
+      return(inf);
+    }
+    if (par["Lf"] < 0.0) {
+      return(inf);
+    }
+  }
+
+  if (checkR) {
+    // fast retention should not be larger than slow retention
+    double Rf = par["Rf"];
+    double Rs = par["Rs"];
+    if (Rf > Rs) {
+      return(inf);
+    }
+  }
+  if (checkL) {
+    // slow learning should not be larger than fast learning
+    double Ls = par["Ls"];
+    double Lf = par["Lf"];
+    if (Ls > Lf) {
+      return(inf);
+    }
+  }
+
+  // parameters checked, we can now evaluate the model with the parameters
+
+  // get all parameters ready to be passed on to the evaluation function,
+  // in particular, the non-fit parameters need to be added to the vector
+  // unfortuntely, this is hard in C++ (or rather, when using the Rccp
+  // NumericVector class with named elements) so this is a lot of code:
+  NumericVector epar = par;
+  // double nfpNo = nonfitpar.size();
+  // double  fpNo = par.size();
+  // CharacterVector nfpNames = nonfitpar.attr("names");
+  // CharacterVector eparNames = par.attr("names");
+  // for(int idx = 0; idx < nfpNo; ++idx) {
+  //   epar.push_back( nonfitpar[idx] );
+  //   eparNames.push_back( nfpNames[idx] );
+  // }
+  // epar.attr("names") = eparNames;
+
+  // evaluate the model with these parameters:
+  DataFrame model = twoRateReachModel(epar, rotations);
+  // get only the total model output
+  NumericVector total = model["total"];
+  // these are the errors of the model in predicting the behavior for each trial:
+  NumericVector errors = reaches - total;
+  // now we square and then sum those errors:
+  double sumerrors2 = std::inner_product(errors.begin(), errors.end(), errors.begin(), 0.0);
+  // and return that, divided by the number of trials, the MSE:
+  return(sumerrors2/rotations.size());
+
+}
