@@ -3,7 +3,6 @@
 # it uses a least squares methods that has actually been shown
 # not to yield optimal fits in some respects, with a better
 # alternative from Albert & Shadmehr (2017 or 2018?)
-#
 # we can still improve on the speed by coding in C++
 
 #' Fit the Two-Rate Model To a Dataset.
@@ -11,7 +10,7 @@
 #' @param reaches A sequence of reach deviations.
 #' @param rotations A sequence of feedback manipulations.
 #' @param fitInitialState Boolean: is the initial state zero or does it have to be fit.
-#' @param oneTwoRates How many rates to fit (1 or 2).
+#' @param oneTwoRates How many processes to fit? (1 or 2)
 #' @param verbose Should detailed information be outputted during the fitting?
 #' @return The set of parameters that minimizes the difference between model output and the \code{reaches} given the \code{rotations}.
 fitTwoRateReachModel <- function(reaches,rotations,fitInitialState=FALSE,oneTwoRates=2,verbose=FALSE) {

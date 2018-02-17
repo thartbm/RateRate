@@ -2,7 +2,7 @@
 using namespace Rcpp;
 
 // This is a simple example of exporting a C++ function to R. You can
-// source this function into an R session using the Rcpp::sourceCpp 
+// source this function into an R session using the Rcpp::sourceCpp
 // function (or via the Source button on the editor toolbar). Learn
 // more about Rcpp at:
 //
@@ -11,24 +11,23 @@ using namespace Rcpp;
 //   http://gallery.rcpp.org/
 //
 
-
 // [[Rcpp::export]]
 DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
-  
+
   // number of values to pre allocate for output
   // and number of loop iterations
   int n = rot.size();
-  
+
   // initialize the states:
   float Xs_t0 = 0;
   float Xf_t0 = 0;
-  
+
   // initialize other variables:
   float e_t0 = 0;
   float Xs_t1 = 0;
   float Xf_t1 = 0;
   float X_t1 = 0;
-  
+
   // check if the fast and slow state are to be initialized at some value:
   if(par.containsElementNamed("Is")) {
     Xs_t0 = par["Is"];
@@ -36,7 +35,7 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
   if(par.containsElementNamed("If")) {
     Xf_t0 = par["If"];
   }
-  
+
   // only evaluate a process if both its retention and learning rate exist:
   bool doslow = TRUE;
   bool dofast = TRUE;
@@ -52,26 +51,26 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
   if(par.containsElementNamed("Lf")==FALSE) {
     dofast = FALSE;
   }
-  
+
   // initialize total state, so that errors can be calculated:
   float X_t0 = Xs_t0 + Xf_t0;
-  
+
   // vectors will be combined into a dataframe at the end:
   // IntegerVector a = df["a"];
   NumericVector slow(n);
   NumericVector fast(n);
   NumericVector total(n);
-  
-  
+
+
   for(int t = 0; t < n; ++t) {
-    
+
     // calculate previous error:
     if( NumericVector::is_na(rot[t]) ) {
       e_t0 = 0;
     } else {
       e_t0 = rot[t] - X_t0;
     }
-    
+
     // calculate current response:
     if (doslow) {
       Xs_t1 = (par["Rs"] * Xs_t0) + (par["Ls"] * e_t0);
@@ -83,25 +82,25 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
     } else {
       Xf_t1 = 0;
     }
-    
+
     // total output is the sum of the two processes:
     X_t1 = Xs_t1 + Xf_t1;
-    
+
     // store values in the vectors:
     slow[t] = Xs_t1;
     fast[t] = Xf_t1;
     total[t] = X_t1;
-    
+
     // prepare for next iteration:
     Xs_t0 = Xs_t1;
     Xf_t0 = Xf_t1;
     X_t0 = X_t1;
-    
+
   }
-  
+
   // return a new data frame
   return DataFrame::create(_["slow"]= slow, _["fast"]= fast, _["total"]= total);
-  
+
 }
 
 // the function below is not working correctly, so it should not be used:
@@ -109,12 +108,12 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
 
 // // [[Rcpp::export]]
 // double twoRateReachModelErrors(NumericVector par, NumericVector reaches, NumericVector rotations) {
-// 
+//
 //   // first we check if the input parameters make sense
 //   // if not, we return infinity:
 //   double inf = std::numeric_limits<double>::infinity();
-// 
-// 
+//
+//
 //   // only evaluate rates if both its slow and fast version exist:
 //   // also check if each parameter is within bounds
 //   bool checkR = TRUE;
@@ -159,7 +158,7 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
 //       return(inf);
 //     }
 //   }
-// 
+//
 //   if (checkR) {
 //     // fast retention should not be larger than slow retention
 //     double Rf = par["Rf"];
@@ -176,9 +175,9 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
 //       return(inf);
 //     }
 //   }
-// 
+//
 //   // parameters checked, we can now evaluate the model with the parameters
-// 
+//
 //   // get all parameters ready to be passed on to the evaluation function,
 //   // in particular, the non-fit parameters need to be added to the vector
 //   // unfortuntely, this is hard in C++ (or rather, when using the Rccp
@@ -193,7 +192,7 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
 //   //   eparNames.push_back( nfpNames[idx] );
 //   // }
 //   // epar.attr("names") = eparNames;
-// 
+//
 //   // evaluate the model with these parameters:
 //   DataFrame model = twoRateReachModel(epar, rotations);
 //   // get only the total model output
@@ -204,5 +203,5 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
 //   double sumerrors2 = std::inner_product(errors.begin(), errors.end(), errors.begin(), 0.0);
 //   // and return that, divided by the number of trials, the MSE:
 //   return(sumerrors2/rotations.size());
-// 
+//
 // }
