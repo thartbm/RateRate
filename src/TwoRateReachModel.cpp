@@ -11,6 +11,13 @@ using namespace Rcpp;
 //   http://gallery.rcpp.org/
 //
 
+//' @title Evaluate the Two-Rate Model.
+//' @param par A list of named parameters.
+//' @param schedule A sequence of feedback manipulations
+//' @returns A dataframe with three columns, the states of the \code{fast} and \code{slow} process and the \code{total} model output. Each row has the states and output for every trial in the rotation schedule.
+//' @description Evaluate the Two-Rate Model Given Parameters and a Perturbation Schedule.
+//' @seealso \code{\link{fitTwoRateReachModel}} and \code{\link{twoRateReachModelErrors}}
+//' @export
 // [[Rcpp::export]]
 DataFrame twoRateReachModel(NumericVector par, NumericVector schedule) {
 
@@ -103,7 +110,14 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector schedule) {
 
 }
 
-
+//' @title Return the Mean Squared Error Between a Two-Rate Model and a Dataset.
+//' @param par A list of named parameters.
+//' @param reaches A list of reach deviations.
+//' @param schedule A sequence of feedback manipulations
+//' @returns The average squared error of the model's prediction of the reach deviations given the rotation schedule and model parameters.
+//' @description Calculates the average squared error of the Two-Rate Model's prediction, given a set of parameters and a rotation schedule.
+//' @seealso \code{\link{fitTwoRateReachModel}} and \code{\link{twoRateReachModel}}
+//' @export
 // [[Rcpp::export]]
 double twoRateReachModelErrors(NumericVector par, NumericVector reaches, NumericVector schedule) {
 

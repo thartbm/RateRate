@@ -1,9 +1,14 @@
-# these are the workhorse functions that actually fit the model
+# this file only has a high-level function getting an optimal model fit
+# the work-horse functions are written in Rcpp
 #
 # it uses a least squares methods that has actually been shown
 # not to yield optimal fits in some respects, with a better
 # alternative from Albert & Shadmehr (2017 or 2018?)
-# we can still improve on the speed by coding in C++
+
+#' @useDynLib RateRate, .registration = TRUE
+#' @importFrom Rcpp sourceCpp
+NULL
+
 
 #' @title Fit the Two-Rate Model To a Dataset.
 #' @param reaches A sequence of reach deviations.
@@ -45,6 +50,7 @@
 #'
 #' @seealso \code{\link{twoRateReachModelErrors}} and
 #' \code{\link{twoRateReachModel}}
+#' @export
 fitTwoRateReachModel <- function(reaches,schedule,fitInitialState=FALSE,oneTwoRates=2,verbose=FALSE) {
 
   # Parameters to fit:
@@ -113,58 +119,29 @@ fitTwoRateReachModel <- function(reaches,schedule,fitInitialState=FALSE,oneTwoRa
         next()
       }
     }
-    # if (oneTwoRates == 1) {
-    #   if (par['Rs'] <= 0) {
-    #     MSEs <- c(MSEs, NA)
-    #     next()
-    #   }
-    #   if (par['Ls'] <= 1) {
-    #     MSEs <- c(MSEs, NA)
-    #     next()
-    #   }
-    # }
     # get the error for this instance of the model (no fitting):
-    MSEs <- c(MSEs, mean((twoRateReachModel(par,schedule)$total - reaches)^2, na.rm=TRUE))
+    MSEs <- c(MSEs, mean((RateRate::twoRateReachModel(par,schedule)$total - reaches)^2, na.rm=TRUE))
   }
   fitpars <- names(par.combos)
-  # print(length(MSEs))
-  # print(length(which(is.na(MSEs))))
-  # print(MSEs)
   par.combos$MSE <- MSEs
 
-  # find the best 5 fits and finetune those:
+  # find the best 5 fits and fine-tune those:
   if (verbose) {
     cat('optimizing fit on the best 5\n')
   }
   runfull.idx <- order(par.combos$MSE, decreasing=FALSE)[1:5]
-  # print(c('mean'=mean(par.combos$MSE, na.rm=TRUE),'sd'=sd(par.combos$MSE, na.rm=TRUE)))
-  # print(par.combos$MSE[runfull.idx])
   # and optimize:
   MSEs <- c()
   models <- list()
   for (comboNo in 1:length(runfull.idx)) {
     pc <- par.combos[runfull.idx[comboNo],]
-    # print(pc)
     par <- pc[fitpars]
-    # print(par)
-    models[[comboNo]] <- optim(par=par, twoRateReachModelErrors, gr=NULL, reaches, schedule, control=control)
-    MSEs <- c(MSEs, mean((twoRateReachModel(models[[comboNo]]$par,schedule)$total - reaches)^2, na.rm=TRUE))
+    # this could be more efficient:
+    models[[comboNo]] <- optim(par=par, RateRate::twoRateReachModelErrors, gr=NULL, reaches, schedule, control=control)
+    MSEs <- c(MSEs, mean((RateRate::twoRateReachModel(models[[comboNo]]$par,schedule)$total - reaches)^2, na.rm=TRUE))
   }
   best.idx <- sort(MSEs, index.return=TRUE)$ix[1]
   fit <- models[[best.idx]]
-
-  # # use "optim" to fit the model to the data:
-  # control <- list('maxit'=10000, 'ndeps'=1e-9 )
-  # fit <- optim(par=reachpar, twoRateReachModelErrors, gr=NULL, reaches, schedule, control=control)
-
-  # The function optim fits the model for us (read it's help page).
-  # Optim finds the parameter values, that minimize the error returned by the function we point it to.
-  # We give optim some starting parameter values, a function to be minimized, a function for gradients,
-  # that we don't use (it is set to NULL), stuff to pass to these functions (the reach data), and then we
-  # provide some other arguments, including this 'control' thing. I set that to a value that allows optim
-  # to search longer, so that the fit might be improved at the cost of longer computation.
-
-  # Below, we will define the twoRateReachModelErrors function, which has the more important code.
 
   # Right here, we will just plot the output.
   if (verbose) {
