@@ -56,6 +56,15 @@ one-process fit is requested, in which case only Rs and Ls are fit.
 \examples{
 data("RotAdapt")
 par <- fitTwoRateReachModel(RotAdapt$reaches,RotAdapt$schedule)
+par
+
+tworatemodel <- twoRateReachModel(par, RotAdapt$schedule)
+str(tworatemodel)
+
+plot(RotAdapt$reaches, ylim=c(-35,35), col='gray')
+lines(tworatemodel$total)
+lines(tworatemodel$slow, col='blue')
+lines(tworatemodel$fast, col='red')
 }
 \seealso{
 \code{\link{twoRateReachModelErrors}} and
