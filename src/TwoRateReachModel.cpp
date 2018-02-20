@@ -77,7 +77,8 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector schedule) {
       // so the error should be zero
       e_t0 = 0;
     } else {
-      e_t0 = schedule[t] - X_t0;
+      // you should _counter_ the perturbation:
+      e_t0 = -1 * (X_t0 + schedule[t]);
     }
 
     // calculate current response:

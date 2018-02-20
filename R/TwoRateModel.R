@@ -53,6 +53,18 @@ NULL
 #'
 #' @seealso \code{\link{twoRateReachModelErrors}} and
 #' \code{\link{twoRateReachModel}}
+#' @examples
+#' data("RotAdapt")
+#' par <- fitTwoRateReachModel(RotAdapt$reaches,RotAdapt$schedule)
+#' par
+#'
+#' tworatemodel <- twoRateReachModel(par, RotAdapt$schedule)
+#' str(tworatemodel)
+#'
+#' plot(RotAdapt$reaches, ylim=c(-35,35), col='gray')
+#' lines(tworatemodel$total)
+#' lines(tworatemodel$slow, col='blue')
+#' lines(tworatemodel$fast, col='red')
 #' @export
 fitTwoRateReachModel <- function(reaches,schedule,fitInitialState=FALSE,oneTwoRates=2,verbose=FALSE) {
 

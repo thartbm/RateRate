@@ -53,6 +53,10 @@ Xf(t) = Rf . Xf(t-1) + Lf . E(t-1)
 The four parameters Rs, Ls, Rf and Lf are returned, except when a
 one-process fit is requested, in which case only Rs and Ls are fit.
 }
+\examples{
+data("RotAdapt")
+par <- fitTwoRateReachModel(RotAdapt$reaches,RotAdapt$schedule)
+}
 \seealso{
 \code{\link{twoRateReachModelErrors}} and
 \code{\link{twoRateReachModel}}
