@@ -5,10 +5,13 @@
 # not to yield optimal fits in some respects, with a better
 # alternative from Albert & Shadmehr (2017 or 2018?)
 
+# the following lines added to organize the namespace:
+
 #' @useDynLib RateRate, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 NULL
 
+# roxygen lines to create man pages:
 
 #' @title Fit the Two-Rate Model To a Dataset.
 #' @param reaches A sequence of reach deviations.
