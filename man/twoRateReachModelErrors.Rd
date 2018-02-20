@@ -19,4 +19,7 @@ The average squared error of the model's prediction of the reach deviations give
 \description{
 Calculates the average squared error of the Two-Rate Model's prediction, given a set of parameters and a rotation schedule.
 }
-
+\seealso{
+\code{\link{fitTwoRateReachModel}} and
+\code{\link{twoRateReachModel}}
+}

@@ -4,23 +4,56 @@
 \alias{fitTwoRateReachModel}
 \title{Fit the Two-Rate Model To a Dataset.}
 \usage{
-fitTwoRateReachModel(reaches, rotations, fitInitialState = FALSE,
+fitTwoRateReachModel(reaches, schedule, fitInitialState = FALSE,
   oneTwoRates = 2, verbose = FALSE)
 }
 \arguments{
 \item{reaches}{A sequence of reach deviations.}
 
-\item{rotations}{A sequence of feedback manipulations.}
+\item{schedule}{A sequence of feedback manipulations.}
 
-\item{fitInitialState}{Boolean: is the initial state zero or does it have to be fit.}
+\item{fitInitialState}{Boolean: is the initial state zero or does it have to
+be fit.}
 
 \item{oneTwoRates}{How many processes to fit? (1 or 2)}
 
 \item{verbose}{Should detailed information be outputted during the fitting?}
 }
 \value{
-The set of parameters that minimizes the difference between model output and the \code{reaches} given the \code{rotations}.
+The set of parameters that minimizes the difference between model
+output and the \code{reaches} given the perturbation \code{schedule}.
 }
-\description{
-Fit the Two-Rate Model To a Dataset.
+\details{
+Fit Smith et al's (2006) Two-Rate Model to a set of reach
+deviations and a perturbation schedule. It does grid search first, and picks
+the best 5 are fit with least square optimization after which the best fit
+is returned. Mean squared error, as given by
+\code{\link{twoRateReachModelErrors}} is used to determine quality of fit.
+
+The sequences of \code{reaches} and the \code{schedule} should have the same
+length. NAs in the \code{reaches} will be ignored, but in the
+\code{schedule} they indicate error-clamp trials.
+
+The model prediction base on the parameters can be retrieved by evaluating
+them, based on the perturbation schedule, with
+\code{\link{twoRateReachModel}}.
+
+In the Two-Rate Model of motor learning, the motor output X on a trial t,
+is the sum of the output of a slow and fast process:
+
+X(t) = Xs(t) + Xf(t)
+
+And each of these two processes retain part of their previous learning and
+learn from previous errors:
+
+Xs(t) = Rs . Xs(t-1) + Ls . E(t-1)
+
+Xf(t) = Rf . Xf(t-1) + Lf . E(t-1)
+
+The four parameters Rs, Ls, Rf and Lf are returned, except when a
+one-process fit is requested, in which case only Rs and Ls are fit.
+}
+\seealso{
+\code{\link{twoRateReachModelErrors}} and
+\code{\link{twoRateReachModel}}
 }

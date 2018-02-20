@@ -12,11 +12,11 @@ using namespace Rcpp;
 //
 
 // [[Rcpp::export]]
-DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
+DataFrame twoRateReachModel(NumericVector par, NumericVector schedule) {
 
   // number of values to pre allocate for output
   // and number of loop iterations
-  int n = rot.size();
+  int n = schedule.size();
 
   // initialize the states:
   float Xs_t0 = 0;
@@ -65,10 +65,10 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
   for(int t = 0; t < n; ++t) {
 
     // calculate previous error:
-    if( NumericVector::is_na(rot[t]) ) {
+    if( NumericVector::is_na(schedule[t]) ) {
       e_t0 = 0;
     } else {
-      e_t0 = rot[t] - X_t0;
+      e_t0 = schedule[t] - X_t0;
     }
 
     // calculate current response:
@@ -105,7 +105,7 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector rot) {
 
 
 // [[Rcpp::export]]
-double twoRateReachModelErrors(NumericVector par, NumericVector reaches, NumericVector rotations) {
+double twoRateReachModelErrors(NumericVector par, NumericVector reaches, NumericVector schedule) {
 
   // first we check if the input parameters make sense
   // if not, we return infinity:
@@ -175,24 +175,7 @@ double twoRateReachModelErrors(NumericVector par, NumericVector reaches, Numeric
   }
 
   // parameters checked, we can now evaluate the model with the parameters
-
-  // get all parameters ready to be passed on to the evaluation function,
-  // in particular, the non-fit parameters need to be added to the vector
-  // unfortuntely, this is hard in C++ (or rather, when using the Rccp
-  // NumericVector class with named elements) so this is a lot of code:
-  NumericVector epar = par;
-  // double nfpNo = nonfitpar.size();
-  // double  fpNo = par.size();
-  // CharacterVector nfpNames = nonfitpar.attr("names");
-  // CharacterVector eparNames = par.attr("names");
-  // for(int idx = 0; idx < nfpNo; ++idx) {
-  //   epar.push_back( nonfitpar[idx] );
-  //   eparNames.push_back( nfpNames[idx] );
-  // }
-  // epar.attr("names") = eparNames;
-
-  // evaluate the model with these parameters:
-  DataFrame model = twoRateReachModel(epar, rotations);
+  DataFrame model = twoRateReachModel(par, schedule);
   // get only the total model output
   NumericVector total = model["total"];
   // these are the errors of the model in predicting the behavior for each trial:
@@ -200,6 +183,6 @@ double twoRateReachModelErrors(NumericVector par, NumericVector reaches, Numeric
   // now we square and then sum those errors:
   double sumerrors2 = std::inner_product(errors.begin(), errors.end(), errors.begin(), 0.0);
   // and return that, divided by the number of trials, the MSE:
-  return(sumerrors2/rotations.size());
+  return(sumerrors2/schedule.size());
 
 }

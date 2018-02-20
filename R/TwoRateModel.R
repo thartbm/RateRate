@@ -5,16 +5,47 @@
 # alternative from Albert & Shadmehr (2017 or 2018?)
 # we can still improve on the speed by coding in C++
 
-#' Fit the Two-Rate Model To a Dataset.
-#'
+#' @title Fit the Two-Rate Model To a Dataset.
 #' @param reaches A sequence of reach deviations.
-#' @param rotations A sequence of feedback manipulations.
-#' @param fitInitialState Boolean: is the initial state zero or does it have to be fit.
+#' @param schedule A sequence of feedback manipulations.
+#' @param fitInitialState Boolean: is the initial state zero or does it have to
+#' be fit.
 #' @param oneTwoRates How many processes to fit? (1 or 2)
 #' @param verbose Should detailed information be outputted during the fitting?
-#' @return The set of parameters that minimizes the difference between model output and the \code{reaches} given the \code{rotations}.
-#' @seealso \code{\link{twoRateReachModelErrors}}, which generates the error that is minimized, and uses \code{\link{twoRateReachModel}} to evaluate the model
-fitTwoRateReachModel <- function(reaches,rotations,fitInitialState=FALSE,oneTwoRates=2,verbose=FALSE) {
+#' @return The set of parameters that minimizes the difference between model
+#' output and the \code{reaches} given the perturbation \code{schedule}.
+#' @details Fit Smith et al's (2006) Two-Rate Model to a set of reach
+#' deviations and a perturbation schedule. It does grid search first, and picks
+#' the best 5 are fit with least square optimization after which the best fit
+#' is returned. Mean squared error, as given by
+#' \code{\link{twoRateReachModelErrors}} is used to determine quality of fit.
+#'
+#' The sequences of \code{reaches} and the \code{schedule} should have the same
+#' length. NAs in the \code{reaches} will be ignored, but in the
+#' \code{schedule} they indicate error-clamp trials.
+#'
+#' The model prediction base on the parameters can be retrieved by evaluating
+#' them, based on the perturbation schedule, with
+#' \code{\link{twoRateReachModel}}.
+#'
+#' In the Two-Rate Model of motor learning, the motor output X on a trial t,
+#' is the sum of the output of a slow and fast process:
+#'
+#' X(t) = Xs(t) + Xf(t)
+#'
+#' And each of these two processes retain part of their previous learning and
+#' learn from previous errors:
+#'
+#' Xs(t) = Rs . Xs(t-1) + Ls . E(t-1)
+#'
+#' Xf(t) = Rf . Xf(t-1) + Lf . E(t-1)
+#'
+#' The four parameters Rs, Ls, Rf and Lf are returned, except when a
+#' one-process fit is requested, in which case only Rs and Ls are fit.
+#'
+#' @seealso \code{\link{twoRateReachModelErrors}} and
+#' \code{\link{twoRateReachModel}}
+fitTwoRateReachModel <- function(reaches,schedule,fitInitialState=FALSE,oneTwoRates=2,verbose=FALSE) {
 
   # Parameters to fit:
   # 1) 'Rs' = slow retention rate
@@ -93,7 +124,7 @@ fitTwoRateReachModel <- function(reaches,rotations,fitInitialState=FALSE,oneTwoR
     #   }
     # }
     # get the error for this instance of the model (no fitting):
-    MSEs <- c(MSEs, mean((twoRateReachModel(par,rotations)$total - reaches)^2, na.rm=TRUE))
+    MSEs <- c(MSEs, mean((twoRateReachModel(par,schedule)$total - reaches)^2, na.rm=TRUE))
   }
   fitpars <- names(par.combos)
   # print(length(MSEs))
@@ -116,15 +147,15 @@ fitTwoRateReachModel <- function(reaches,rotations,fitInitialState=FALSE,oneTwoR
     # print(pc)
     par <- pc[fitpars]
     # print(par)
-    models[[comboNo]] <- optim(par=par, twoRateReachModelErrors, gr=NULL, reaches, rotations, control=control)
-    MSEs <- c(MSEs, mean((twoRateReachModel(models[[comboNo]]$par,rotations)$total - reaches)^2, na.rm=TRUE))
+    models[[comboNo]] <- optim(par=par, twoRateReachModelErrors, gr=NULL, reaches, schedule, control=control)
+    MSEs <- c(MSEs, mean((twoRateReachModel(models[[comboNo]]$par,schedule)$total - reaches)^2, na.rm=TRUE))
   }
   best.idx <- sort(MSEs, index.return=TRUE)$ix[1]
   fit <- models[[best.idx]]
 
   # # use "optim" to fit the model to the data:
   # control <- list('maxit'=10000, 'ndeps'=1e-9 )
-  # fit <- optim(par=reachpar, twoRateReachModelErrors, gr=NULL, reaches, rotations, control=control)
+  # fit <- optim(par=reachpar, twoRateReachModelErrors, gr=NULL, reaches, schedule, control=control)
 
   # The function optim fits the model for us (read it's help page).
   # Optim finds the parameter values, that minimize the error returned by the function we point it to.
@@ -148,7 +179,7 @@ fitTwoRateReachModel <- function(reaches,rotations,fitInitialState=FALSE,oneTwoR
 
 # The two functions below are replaced by Rcpp versions, speeding up the (fitting) process:
 
-# twoRateReachModelErrors <- function(par,reaches,rotations,nonfitpar=c()) {
+# twoRateReachModelErrors <- function(par,reaches,schedule,nonfitpar=c()) {
 #
 #   # This function is called by optim(), providing a set of parameter values, that are varied by optim.
 #   # Optim() also passes the data, which we use here to calculate how far of the model with the given
@@ -213,7 +244,7 @@ fitTwoRateReachModel <- function(reaches,rotations,fitInitialState=FALSE,oneTwoR
 #
 #   # If we got this far, the parameters are valid.
 #   # We can see what the model output is with those parameters.
-#   errors <- (twoRateReachModel(c(par,nonfitpar),rotations)$total - reaches)
+#   errors <- (twoRateReachModel(c(par,nonfitpar),schdedule)$total - reaches)
 #   # print(errors)
 #   # print(mean(errors))
 #
@@ -234,7 +265,7 @@ fitTwoRateReachModel <- function(reaches,rotations,fitInitialState=FALSE,oneTwoR
 # }
 #
 #
-# twoRateReachModel <- function(par,rot) {
+# twoRateReachModel <- function(par,schedule) {
 #
 #   # This function generates model output, given a set of parameter values. It is used in fitting the model
 #   # to data (finding the parameter values that best describe the data), but also to see what that fitted
@@ -265,7 +296,7 @@ fitTwoRateReachModel <- function(reaches,rotations,fitInitialState=FALSE,oneTwoR
 #   dofast <- all(c('Rf','Lf') %in% names(par))
 #
 #   # We loop through all trials:
-#   for (trial in c(1:length(rot))) {
+#   for (trial in c(1:length(schedule))) {
 #
 #     # if (is.na()) {
 #     #   slow <- c(slow, NA)
@@ -275,10 +306,10 @@ fitTwoRateReachModel <- function(reaches,rotations,fitInitialState=FALSE,oneTwoR
 #     # }
 #
 #     # determine error:
-#     if (is.na(rot[trial])) {
+#     if (is.na(schedule[trial])) {
 #       e_t0 <- 0 # error clamps: there is no learning, but there is forgetting...
 #     } else {
-#       e_t0 <- (rot[trial] - X_t0)
+#       e_t0 <- (schedule[trial] - X_t0)
 #     }
 #
 #     # calculate what the output should be according to the slow and fast process:
