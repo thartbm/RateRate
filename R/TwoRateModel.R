@@ -13,6 +13,7 @@
 #' @param oneTwoRates How many processes to fit? (1 or 2)
 #' @param verbose Should detailed information be outputted during the fitting?
 #' @return The set of parameters that minimizes the difference between model output and the \code{reaches} given the \code{rotations}.
+#' @seealso \code{\link{twoRateReachModelErrors}}, which generates the error that is minimized, and uses \code{\link{twoRateReachModel}} to evaluate the model
 fitTwoRateReachModel <- function(reaches,rotations,fitInitialState=FALSE,oneTwoRates=2,verbose=FALSE) {
 
   # Parameters to fit:

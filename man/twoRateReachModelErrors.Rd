@@ -1,4 +1,3 @@
-twoRateReachModelErrors(NumericVector par, NumericVector reaches, NumericVector rotations)
 % made by hand, fro Rcpp function
 \name{twoRateReachModelErrors}
 \alias{twoRateReachModelErrors}
