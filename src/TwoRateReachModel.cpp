@@ -73,6 +73,8 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector schedule) {
 
     // calculate previous error:
     if( NumericVector::is_na(schedule[t]) ) {
+      // if there is an NA, it was an error-calmped trial
+      // so the error should be zero
       e_t0 = 0;
     } else {
       e_t0 = schedule[t] - X_t0;
