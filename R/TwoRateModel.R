@@ -83,25 +83,25 @@ fitTwoRateReachModel <- function(reaches,schedule,fitInitialState=FALSE,oneTwoRa
 
   # find optimal starting parameters for this dataset, with grid search
   # first determine all combinations of parameters to test
-  nsteps <- 7
-  grid.steps <- seq(from=0.5/nsteps, to=1-(0.5/nsteps), by=1/nsteps)
+  nsteps <- 5
+  grid.steps <- seq(from=0.25/nsteps, to=1-(0.25/nsteps), by=1/nsteps)
   # print(grid.steps)
   if (fitInitialState) {
     if (oneTwoRates == 2) {
       state.steps <- seq(from=-6,to=6, by=4)
-      par.combos <- expand.grid(grid.steps,grid.steps,grid.steps,grid.steps,state.steps,state.steps)
+      par.combos <- expand.grid(grid.steps+0.5,grid.steps,grid.steps+0.5,grid.steps,state.steps,state.steps)
       names(par.combos) <- c('Rs','Ls','Rf','Lf','Is','If')
     } else {
       state.steps <- seq(from=-6,to=6, by=4)
-      par.combos <- expand.grid(grid.steps,grid.steps,state.steps)
+      par.combos <- expand.grid(grid.steps+0.5,grid.steps,state.steps)
       names(par.combos) <- c('Rs','Ls','Is')
     }
   } else {
     if (oneTwoRates == 2) {
-      par.combos <- expand.grid(grid.steps,grid.steps,grid.steps,grid.steps)
+      par.combos <- expand.grid(grid.steps+0.5,grid.steps,grid.steps+0.5,grid.steps)
       names(par.combos) <- c('Rs','Ls','Rf','Lf')
     } else {
-      par.combos <- expand.grid(grid.steps,grid.steps)
+      par.combos <- expand.grid(grid.steps+0.5,grid.steps)
       names(par.combos) <- c('Rs','Ls')
     }
   }
