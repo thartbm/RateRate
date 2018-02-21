@@ -53,6 +53,11 @@ NULL
 #'
 #' @seealso \code{\link{twoRateReachModelErrors}} and
 #' \code{\link{twoRateReachModel}}
+#'
+#' Smith MA, Ghazizadeh A, Shadmehr R (2006). Interacting Adaptive Processes
+#' with Different Timescales Underlie Short-Term Motor Learning. PLoS Biol.
+#' 2006 Jun;4(6):e179. \url{https://doi.org/10.1371/journal.pbio.0040179}
+#'
 #' @examples
 #' data("RotAdapt")
 #' param <- fitTwoRateReachModel(RotAdapt$reaches,RotAdapt$schedule)
