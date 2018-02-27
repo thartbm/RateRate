@@ -89,7 +89,7 @@ fitTwoRateReachModel <- function(reaches,schedule,fitInitialState=FALSE,oneTwoRa
   # find optimal starting parameters for this dataset, with grid search
   # first determine all combinations of parameters to test
   nsteps <- 5
-  grid.steps <- seq(from=0.25/nsteps, to=1-(0.25/nsteps), by=1/nsteps)
+  grid.steps <- seq(from=0.25/nsteps, to=0.5-(0.25/nsteps), by=1/nsteps)
   # print(grid.steps)
   if (fitInitialState) {
     if (oneTwoRates == 2) {
