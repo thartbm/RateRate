@@ -23,11 +23,14 @@ be fit.}
 The set of parameters that minimizes the difference between model
 output and the \code{reaches} given the perturbation \code{schedule}.
 }
-\details{
+\description{
 Fit Smith et al's (2006) Two-Rate Model to a set of reach
-deviations and a perturbation schedule. It does grid search first, and picks
-the best 5 are fit with least square optimization after which the best fit
-is returned. Mean squared error, as given by
+deviations and a perturbation schedule.
+}
+\details{
+This function runs a grid search first, and picks the best 5 are
+fit with least square optimization after which the best fit is returned.
+Mean squared error, as given by
 \code{\link{twoRateReachModelErrors}} is used to determine quality of fit.
 
 The sequences of \code{reaches} and the \code{schedule} should have the same

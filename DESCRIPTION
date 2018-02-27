@@ -1,13 +1,13 @@
 Package: RateRate
 Type: Package
-Title: Evaluate And Fit The Two-Rate Model Of Motor Learning
+Title: Evaluate and Fit the Two-Rate Model of Motor Learning
 Version: 0.0.0.9000
 Authors@R: c(person("Marius", "'t Hart", email = "thartbm@gmail.com",
                   role = c("aut", "cre")),
              person("Jennifer", "Ruttle", email = "jennruttle@gmail.com", role = "aut"),
              person("Denise", "Henriques", email = "deniseh@yorku.ca", role = "aut"))
 Maintainer: Marius 't Hart <thartbm@gmail.com>
-Description: RateRate provides functions to evaluate the two-rate 
+Description: This package provides functions to evaluate the two-rate 
     model as described by Maurice Smith et al. (2006), as well as
     an error-function that can be used for fitting the model and a 
     function that first does a grid search, picks the best 5 fits and
@@ -17,5 +17,6 @@ Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
 RoxygenNote: 6.0.1
+Depends: R (>= 2.10)
 Imports: 
     Rcpp
