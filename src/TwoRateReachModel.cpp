@@ -196,7 +196,8 @@ double twoRateReachModelErrors(NumericVector par, NumericVector reaches, Numeric
   // get only the total model output
   NumericVector total = model["total"];
   // these are the errors of the model in predicting the behavior for each trial:
-  NumericVector errors = reaches - total;
+  NumericVector errors = na_omit(reaches - total);
+
   // now we square and then sum those errors:
   double sumerrors2 = std::inner_product(errors.begin(), errors.end(), errors.begin(), 0.0);
   // and return that, divided by the number of trials, the MSE:
