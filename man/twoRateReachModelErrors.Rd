@@ -4,7 +4,7 @@
 \alias{twoRateReachModelErrors}
 \title{Return the Mean Squared Error Between a Two-Rate Model and a Dataset.}
 \usage{
-twoRateReachModelErrors(par, reaches, schedule)
+twoRateReachModelErrors(par, reaches, schedule, checkStability = TRUE)
 }
 \arguments{
 \item{par}{A list of named parameters.}

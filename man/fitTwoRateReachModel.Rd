@@ -5,7 +5,7 @@
 \title{Fit the Two-Rate Model To a Dataset.}
 \usage{
 fitTwoRateReachModel(reaches, schedule, oneTwoRates = 2, verbose = FALSE,
-  grid = "uniform", gridsteps = 7)
+  grid = "uniform", gridsteps = 7, checkStability = TRUE)
 }
 \arguments{
 \item{reaches}{A sequence of reach deviations.}
@@ -20,6 +20,8 @@ fitTwoRateReachModel(reaches, schedule, oneTwoRates = 2, verbose = FALSE,
 One of 'uniform' (default), 'restricted' or 'skewed'.}
 
 \item{gridsteps}{How many values of each parameter are used in grid search?}
+
+\item{checkStability}{Use additional stability constraints? (default=TRUE)}
 }
 \value{
 The set of parameters that minimizes the difference between model

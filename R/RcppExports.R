@@ -20,7 +20,7 @@ twoRateReachModel <- function(par, schedule) {
 #' @description Calculates the average squared error of the Two-Rate Model's prediction, given a set of parameters and a rotation schedule.
 #' @seealso \code{\link{fitTwoRateReachModel}} and \code{\link{twoRateReachModel}}
 #' @export
-twoRateReachModelErrors <- function(par, reaches, schedule) {
-    .Call(`_RateRate_twoRateReachModelErrors`, par, reaches, schedule)
+twoRateReachModelErrors <- function(par, reaches, schedule, checkStability = TRUE) {
+    .Call(`_RateRate_twoRateReachModelErrors`, par, reaches, schedule, checkStability)
 }
 

@@ -20,6 +20,7 @@ NULL
 #' @param grid How are parameters values for grid search distributed in [0,1]?
 #' One of 'uniform' (default), 'restricted' or 'skewed'.
 #' @param gridsteps How many values of each parameter are used in grid search?
+#' @param checkStability Use additional stability constraints? (default=TRUE)
 #' @param verbose Should detailed information be outputted during the fitting?
 #' @return The set of parameters that minimizes the difference between model
 #' output and the \code{reaches} given the perturbation \code{schedule}.
@@ -73,7 +74,7 @@ NULL
 #' lines(tworatemodel$slow, col='blue')
 #' lines(tworatemodel$fast, col='red')
 #' @export
-fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,grid='uniform',gridsteps=7) {
+fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,grid='uniform',gridsteps=7,checkStability=TRUE) {
 
   # Parameters to fit:
   # 1) 'Rs' = slow retention rate
@@ -113,6 +114,7 @@ fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,gr
   #     names(par.combos) <- c('Rs','Ls','Is')
   #   }
   # } else {
+
   if (oneTwoRates == 2) {
     par.combos <- expand.grid(1-grid.steps,grid.steps,1-grid.steps,grid.steps)
     names(par.combos) <- c('Rs','Ls','Rf','Lf')
@@ -120,7 +122,7 @@ fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,gr
     par.combos <- expand.grid(1-grid.steps,grid.steps)
     names(par.combos) <- c('Rs','Ls')
   }
-  # }
+  # } // if you do want to fit initial states...
 
   # then test all combinations without fitting, collect MSEs
   MSEs <- c()
@@ -149,6 +151,22 @@ fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,gr
         MSEs <- c(MSEs, NA)
         next()
       }
+      if (checkStability) {
+
+        if ( (((par['Rf'] - par['Lf']) * (par['Rs'] - par['Ls'])) - (par['Lf'] * par['Ls'])) <= 0) {
+#          return(inf);
+          MSEs <- c(MSEs, NA)
+          next()
+        }
+        p = par['Rf'] - par['Lf'] - par['Rs'] + par['Ls']
+        q = (p^2) + (4 * par['Lf'] * par['Ls'])
+        if (((par['Rf'] - par['Lf'] + par['Rs'] - par['Ls']) + q^0.5) >= 2) {
+          # return(inf);
+          MSEs <- c(MSEs, NA)
+          next()
+        }
+
+      }
     }
     # get the error for this instance of the model (no fitting):
     MSEs <- c(MSEs, mean((RateRate::twoRateReachModel(par,schedule)$total - reaches)^2, na.rm=TRUE))
@@ -168,7 +186,7 @@ fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,gr
     pc <- par.combos[runfull.idx[comboNo],]
     par <- pc[fitpars]
     # this could be more efficient:
-    models[[comboNo]] <- stats::optim(par=par, RateRate::twoRateReachModelErrors, gr=NULL, reaches, schedule, control=control)
+    models[[comboNo]] <- stats::optim(par=par, RateRate::twoRateReachModelErrors, gr=NULL, reaches, schedule, checkStability, control=control)
     MSEs <- c(MSEs, mean((RateRate::twoRateReachModel(models[[comboNo]]$par,schedule)$total - reaches)^2, na.rm=TRUE))
   }
   best.idx <- sort(MSEs, index.return=TRUE)$ix[1]

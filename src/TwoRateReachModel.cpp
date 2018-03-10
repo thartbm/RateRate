@@ -122,7 +122,7 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector schedule) {
 //' @seealso \code{\link{fitTwoRateReachModel}} and \code{\link{twoRateReachModel}}
 //' @export
 // [[Rcpp::export]]
-double twoRateReachModelErrors(NumericVector par, NumericVector reaches, NumericVector schedule) {
+double twoRateReachModelErrors(NumericVector par, NumericVector reaches, NumericVector schedule, bool checkStability = true) {
 
   // first we check if the input parameters make sense
   // if not, we return infinity:
@@ -181,6 +181,9 @@ double twoRateReachModelErrors(NumericVector par, NumericVector reaches, Numeric
     if (Rf > Rs) {
       return(inf);
     }
+  } else {
+    // stability check relies on four parameters being set
+    checkStability = false;
   }
   if (checkL) {
     // slow learning should not be larger than fast learning
@@ -189,6 +192,31 @@ double twoRateReachModelErrors(NumericVector par, NumericVector reaches, Numeric
     if (Ls > Lf) {
       return(inf);
     }
+  } else {
+    // stability check relies on four parameters being set
+    checkStability = false;
+  }
+
+  if (checkStability) {
+    // check stability according to Thomas' feedback:
+    // four parameters should be there:
+    double Rf = par["Rf"];
+    double Rs = par["Rs"];
+    double Lf = par["Lf"];
+    double Ls = par["Ls"];
+
+    double aa = ((Rf - Lf) * (Rs - Ls)) - (Lf * Ls);
+    if (aa <= 0) {
+      return(inf);
+    }
+
+    double p = Rf - Lf - Rs + Ls;
+    double q = pow(p, 2) + (4 * Lf * Ls);
+    double bb = ((Rf - Lf + Rs - Ls)  +  pow(q, 0.5));
+    if (bb >= 2) {
+      return(inf);
+    }
+
   }
 
   // parameters checked, we can now evaluate the model with the parameters

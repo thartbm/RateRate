@@ -18,22 +18,23 @@ BEGIN_RCPP
 END_RCPP
 }
 // twoRateReachModelErrors
-double twoRateReachModelErrors(NumericVector par, NumericVector reaches, NumericVector schedule);
-RcppExport SEXP _RateRate_twoRateReachModelErrors(SEXP parSEXP, SEXP reachesSEXP, SEXP scheduleSEXP) {
+double twoRateReachModelErrors(NumericVector par, NumericVector reaches, NumericVector schedule, bool checkStability);
+RcppExport SEXP _RateRate_twoRateReachModelErrors(SEXP parSEXP, SEXP reachesSEXP, SEXP scheduleSEXP, SEXP checkStabilitySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type par(parSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type reaches(reachesSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type schedule(scheduleSEXP);
-    rcpp_result_gen = Rcpp::wrap(twoRateReachModelErrors(par, reaches, schedule));
+    Rcpp::traits::input_parameter< bool >::type checkStability(checkStabilitySEXP);
+    rcpp_result_gen = Rcpp::wrap(twoRateReachModelErrors(par, reaches, schedule, checkStability));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_RateRate_twoRateReachModel", (DL_FUNC) &_RateRate_twoRateReachModel, 2},
-    {"_RateRate_twoRateReachModelErrors", (DL_FUNC) &_RateRate_twoRateReachModelErrors, 3},
+    {"_RateRate_twoRateReachModelErrors", (DL_FUNC) &_RateRate_twoRateReachModelErrors, 4},
     {NULL, NULL, 0}
 };
 
