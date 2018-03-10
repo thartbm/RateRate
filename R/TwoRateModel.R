@@ -16,9 +16,10 @@ NULL
 #' @title Fit the Two-Rate Model To a Dataset.
 #' @param reaches A sequence of reach deviations.
 #' @param schedule A sequence of feedback manipulations.
-#' @param fitInitialState Boolean: is the initial state zero or does it have to
-#' be fit.
 #' @param oneTwoRates How many processes to fit? (1 or 2)
+#' @param grid How are parameters values for grid search distributed in [0,1]?
+#' One of 'uniform' (default), 'restricted' or 'skewed'.
+#' @param gridsteps How many values of each parameter are used in grid search?
 #' @param verbose Should detailed information be outputted during the fitting?
 #' @return The set of parameters that minimizes the difference between model
 #' output and the \code{reaches} given the perturbation \code{schedule}.
@@ -72,7 +73,7 @@ NULL
 #' lines(tworatemodel$slow, col='blue')
 #' lines(tworatemodel$fast, col='red')
 #' @export
-fitTwoRateReachModel <- function(reaches,schedule,fitInitialState=FALSE,oneTwoRates=2,verbose=FALSE) {
+fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,grid='uniform',gridsteps=7) {
 
   # Parameters to fit:
   # 1) 'Rs' = slow retention rate
@@ -89,28 +90,37 @@ fitTwoRateReachModel <- function(reaches,schedule,fitInitialState=FALSE,oneTwoRa
 
   # find optimal starting parameters for this dataset, with grid search
   # first determine all combinations of parameters to test
-  nsteps <- 5
-  grid.steps <- seq(from=0.25/nsteps, to=0.5-(0.25/nsteps), by=1/nsteps)
-  # print(grid.steps)
-  if (fitInitialState) {
-    if (oneTwoRates == 2) {
-      state.steps <- seq(from=-6,to=6, by=4)
-      par.combos <- expand.grid(grid.steps+0.5,grid.steps,grid.steps+0.5,grid.steps,state.steps,state.steps)
-      names(par.combos) <- c('Rs','Ls','Rf','Lf','Is','If')
-    } else {
-      state.steps <- seq(from=-6,to=6, by=4)
-      par.combos <- expand.grid(grid.steps+0.5,grid.steps,state.steps)
-      names(par.combos) <- c('Rs','Ls','Is')
-    }
-  } else {
-    if (oneTwoRates == 2) {
-      par.combos <- expand.grid(grid.steps+0.5,grid.steps,grid.steps+0.5,grid.steps)
-      names(par.combos) <- c('Rs','Ls','Rf','Lf')
-    } else {
-      par.combos <- expand.grid(grid.steps+0.5,grid.steps)
-      names(par.combos) <- c('Rs','Ls')
-    }
+
+  if (grid == 'uniform') {
+    grid.steps <- seq(from=0.5/gridsteps, to=1.0-(0.5/gridsteps), by=1/gridsteps)
   }
+  if (grid == 'restricted') {
+    grid.steps <- seq(from=0.25/gridsteps, to=0.5-(0.25/gridsteps), by=0.5/gridsteps)
+  }
+  if (grid == 'skewed') {
+    grid.steps <- (((exp(seq(from=0,to=2.5,by=2.5/(gridsteps+1))) - 1) / (exp(2.5)-1)))
+  }
+
+  # print(grid.steps)
+  # if (fitInitialState) {
+  #   if (oneTwoRates == 2) {
+  #     state.steps <- seq(from=-6,to=6, by=4)
+  #     par.combos <- expand.grid(1-grid.steps,grid.steps,1-grid.steps,grid.steps,state.steps,state.steps)
+  #     names(par.combos) <- c('Rs','Ls','Rf','Lf','Is','If')
+  #   } else {
+  #     state.steps <- seq(from=-6,to=6, by=4)
+  #     par.combos <- expand.grid(grid.steps+0.5,grid.steps,state.steps)
+  #     names(par.combos) <- c('Rs','Ls','Is')
+  #   }
+  # } else {
+  if (oneTwoRates == 2) {
+    par.combos <- expand.grid(1-grid.steps,grid.steps,1-grid.steps,grid.steps)
+    names(par.combos) <- c('Rs','Ls','Rf','Lf')
+  } else {
+    par.combos <- expand.grid(1-grid.steps,grid.steps)
+    names(par.combos) <- c('Rs','Ls')
+  }
+  # }
 
   # then test all combinations without fitting, collect MSEs
   MSEs <- c()

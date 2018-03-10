@@ -4,20 +4,22 @@
 \alias{fitTwoRateReachModel}
 \title{Fit the Two-Rate Model To a Dataset.}
 \usage{
-fitTwoRateReachModel(reaches, schedule, fitInitialState = FALSE,
-  oneTwoRates = 2, verbose = FALSE)
+fitTwoRateReachModel(reaches, schedule, oneTwoRates = 2, verbose = FALSE,
+  grid = "uniform", gridsteps = 7)
 }
 \arguments{
 \item{reaches}{A sequence of reach deviations.}
 
 \item{schedule}{A sequence of feedback manipulations.}
 
-\item{fitInitialState}{Boolean: is the initial state zero or does it have to
-be fit.}
-
 \item{oneTwoRates}{How many processes to fit? (1 or 2)}
 
 \item{verbose}{Should detailed information be outputted during the fitting?}
+
+\item{grid}{How are parameters values for grid search distributed in [0,1]?
+One of 'uniform' (default), 'restricted' or 'skewed'.}
+
+\item{gridsteps}{How many values of each parameter are used in grid search?}
 }
 \value{
 The set of parameters that minimizes the difference between model
