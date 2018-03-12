@@ -5,7 +5,8 @@ Version: 0.0.0.9000
 Authors@R: c(person("Marius", "'t Hart", email = "thartbm@gmail.com",
                   role = c("aut", "cre")),
              person("Jennifer", "Ruttle", email = "jennruttle@gmail.com", role = "aut"),
-             person("Denise", "Henriques", email = "deniseh@yorku.ca", role = "aut"))
+             person("Denise", "Henriques", email = "deniseh@yorku.ca", role = "aut"),
+             person("Thomas", "Eggert", role = "aut"))
 Maintainer: Marius 't Hart <thartbm@gmail.com>
 Description: This package provides functions to evaluate the two-rate 
     model as described by Maurice Smith et al. (2006), as well as
