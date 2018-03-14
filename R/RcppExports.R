@@ -13,9 +13,10 @@ twoRateReachModel <- function(par, schedule) {
 }
 
 #' @title Return the Mean Squared Error Between a Two-Rate Model and a Dataset.
-#' @param par A list of named parameters.
-#' @param reaches A list of reach deviations.
-#' @param schedule A sequence of feedback manipulations
+#' @param par (NumericVector) named parameters (Ls, Rs, Lf, Rf).
+#' @param reaches (NumericVector) N reach deviations.
+#' @param schedule (NumericVector) N feedback manipulations.
+#' @param checkStability (bool) constrain the model to stable parameters.
 #' @return The average squared error of the model's prediction of the reach deviations given the rotation schedule and model parameters.
 #' @description Calculates the average squared error of the Two-Rate Model's prediction, given a set of parameters and a rotation schedule.
 #' @seealso \code{\link{fitTwoRateReachModel}} and \code{\link{twoRateReachModel}}

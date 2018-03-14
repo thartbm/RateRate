@@ -21,6 +21,8 @@ NULL
 #' One of 'uniform' (default), 'restricted' or 'skewed'.
 #' @param gridsteps How many values of each parameter are used in grid search?
 #' @param checkStability Use additional stability constraints? (default=TRUE)
+#' @param method Fitting method, currently one of "Nelder-Mead" (default,
+#' also 'NM', a linear optimization method) or "Newton" (non-linear).
 #' @param verbose Should detailed information be outputted during the fitting?
 #' @return The set of parameters that minimizes the difference between model
 #' output and the \code{reaches} given the perturbation \code{schedule}.
@@ -74,20 +76,7 @@ NULL
 #' lines(tworatemodel$slow, col='blue')
 #' lines(tworatemodel$fast, col='red')
 #' @export
-fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,grid='uniform',gridsteps=7,checkStability=TRUE) {
-
-  # Parameters to fit:
-  # 1) 'Rs' = slow retention rate
-  # 2) 'Ls' = slow learning rate
-  # 3) 'Rf' = fast retention rate
-  # 4) 'Lf' = fast learning rate
-  # 5) 'Is' = initial state of slow process
-  # 6) 'If' = initial state of fast process
-  # If the slow learning rate is higher than the fast learning rate, the fit should fail.
-  # If any of the values learning or retention rates are outside the range 0-1 the fit should also fail.
-
-  # use "optim" to fit the model to the data:
-  control <- list('maxit'=10000, 'ndeps'=1e-9 )
+fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,grid='uniform',gridsteps=7,checkStability=TRUE,method='NM') {
 
   # find optimal starting parameters for this dataset, with grid search
   # first determine all combinations of parameters to test
@@ -101,6 +90,8 @@ fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,gr
   if (grid == 'skewed') {
     grid.steps <- (((exp(seq(from=0,to=2.5,by=2.5/(gridsteps+1))) - 1) / (exp(2.5)-1)))
   }
+
+  stepmax <- min(diff(grid.steps))
 
   # print(grid.steps)
   # if (fitInitialState) {
@@ -154,20 +145,18 @@ fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,gr
       if (checkStability) {
 
         if ( (((par['Rf'] - par['Lf']) * (par['Rs'] - par['Ls'])) - (par['Lf'] * par['Ls'])) <= 0) {
-#          return(inf);
           MSEs <- c(MSEs, NA)
           next()
         }
         p = par['Rf'] - par['Lf'] - par['Rs'] + par['Ls']
         q = (p^2) + (4 * par['Lf'] * par['Ls'])
         if (((par['Rf'] - par['Lf'] + par['Rs'] - par['Ls']) + q^0.5) >= 2) {
-          # return(inf);
           MSEs <- c(MSEs, NA)
           next()
         }
-
       }
     }
+
     # get the error for this instance of the model (no fitting):
     MSEs <- c(MSEs, mean((RateRate::twoRateReachModel(par,schedule)$total - reaches)^2, na.rm=TRUE))
   }
@@ -185,10 +174,29 @@ fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,gr
   for (comboNo in 1:length(runfull.idx)) {
     pc <- par.combos[runfull.idx[comboNo],]
     par <- pc[fitpars]
-    # this could be more efficient:
-    models[[comboNo]] <- stats::optim(par=par, RateRate::twoRateReachModelErrors, gr=NULL, reaches, schedule, checkStability, control=control)
-    MSEs <- c(MSEs, mean((RateRate::twoRateReachModel(models[[comboNo]]$par,schedule)$total - reaches)^2, na.rm=TRUE))
+    if (method %in% c('NM','Nelder-Mead')) {
+      # this could be more efficient:
+      control <- list('maxit'=10000, 'ndeps'=1e-32, 'fnscale'=1 * diff(range(schedule, na.rm=T)) )
+      comboFit <- stats::optim(par=par, RateRate::twoRateReachModelErrors, gr=NULL, reaches, schedule, checkStability, control=control)
+      models[[comboNo]] <- comboFit$par
+    }
+    # if (method %in% c('Newton')) {
+    #   pars <- as.numeric(as.list(par))
+    #   names(pars) <- names(par)
+    #   comboFitting <- stats::nlm(f=RateRate::twoRateReachModelErrors, p=pars, reaches, schedule, checkStability, iterlim=control$maxit, stepmax=stepmax/2, steptol=1e-32, typsize=rep(0.5, length(pars)), fscale=pars, print.level = 2)
+    #   comboFit <- comboFitting$estimate
+    #   names(comboFit) <- names(par)
+    #   models[[comboNo]] <- comboFit
+    # }
+    if (method %in% c('Newton','BFGS')) {
+      control <- list('maxit'=10000, 'ndeps'=rep(1e-16, length(par)), 'fnscale'= -1 * diff(range(schedule, na.rm=T))  )
+      comboFit <- stats::optim(par=par, RateRate::twoRateReachModelErrors, gr=NULL, reaches, schedule, checkStability, method='BFGS', control=control)
+      models[[comboNo]] <- comboFit$par
+    }
+
+    MSEs <- c(MSEs, mean((RateRate::twoRateReachModel(models[[comboNo]],schedule)$total - reaches)^2, na.rm=TRUE))
   }
+
   best.idx <- sort(MSEs, index.return=TRUE)$ix[1]
   fit <- models[[best.idx]]
 
@@ -196,10 +204,10 @@ fitTwoRateReachModel <- function(reaches,schedule,oneTwoRates=2,verbose=FALSE,gr
   if (verbose) {
     cat('parameter values yielding the best fit:\n')
     # Show the parameter fits:
-    print(fit$par)
+    print(fit)
   }
 
-  return(fit$par)
+  return(fit)
 
 }
 

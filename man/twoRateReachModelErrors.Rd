@@ -7,11 +7,13 @@
 twoRateReachModelErrors(par, reaches, schedule, checkStability = TRUE)
 }
 \arguments{
-\item{par}{A list of named parameters.}
+\item{par}{(NumericVector) named parameters (Ls, Rs, Lf, Rf).}
 
-\item{reaches}{A list of reach deviations.}
+\item{reaches}{(NumericVector) N reach deviations.}
 
-\item{schedule}{A sequence of feedback manipulations}
+\item{schedule}{(NumericVector) N feedback manipulations.}
+
+\item{checkStability}{(bool) constrain the model to stable parameters.}
 }
 \value{
 The average squared error of the model's prediction of the reach deviations given the rotation schedule and model parameters.

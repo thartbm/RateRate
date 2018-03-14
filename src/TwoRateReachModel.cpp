@@ -114,9 +114,10 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector schedule) {
 }
 
 //' @title Return the Mean Squared Error Between a Two-Rate Model and a Dataset.
-//' @param par A list of named parameters.
-//' @param reaches A list of reach deviations.
-//' @param schedule A sequence of feedback manipulations
+//' @param par (NumericVector) named parameters (Ls, Rs, Lf, Rf).
+//' @param reaches (NumericVector) N reach deviations.
+//' @param schedule (NumericVector) N feedback manipulations.
+//' @param checkStability (bool) constrain the model to stable parameters.
 //' @return The average squared error of the model's prediction of the reach deviations given the rotation schedule and model parameters.
 //' @description Calculates the average squared error of the Two-Rate Model's prediction, given a set of parameters and a rotation schedule.
 //' @seealso \code{\link{fitTwoRateReachModel}} and \code{\link{twoRateReachModel}}
@@ -229,6 +230,9 @@ double twoRateReachModelErrors(NumericVector par, NumericVector reaches, Numeric
   // now we square and then sum those errors:
   double sumerrors2 = std::inner_product(errors.begin(), errors.end(), errors.begin(), 0.0);
   // and return that, divided by the number of trials, the MSE:
-  return(sumerrors2/schedule.size());
+  return(sumerrors2/errors.size());
+
+  // or do we want to return a mean of errors:
+  // return(sum(errors)/errors.size());
 
 }
