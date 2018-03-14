@@ -5,7 +5,8 @@
 \title{Fit the Two-Rate Model To a Dataset.}
 \usage{
 fitTwoRateReachModel(reaches, schedule, oneTwoRates = 2, verbose = FALSE,
-  grid = "uniform", gridsteps = 7, checkStability = TRUE, method = "NM")
+  grid = "uniform", gridsteps = 7, checkStability = TRUE, method = "NM",
+  fnscale = 1)
 }
 \arguments{
 \item{reaches}{A sequence of reach deviations.}
@@ -23,8 +24,16 @@ One of 'uniform' (default), 'restricted' or 'skewed'.}
 
 \item{checkStability}{Use additional stability constraints? (default=TRUE)}
 
-\item{method}{Fitting method, currently one of "Nelder-Mead" (default,
-also 'NM', a linear optimization method) or "Newton" (non-linear).}
+\item{method}{Fitting method, currently one of "Nelder-Mead" (default and
+very robust, also 'NM', a linear optimization method) or "BFGS" (a
+quasi-Newton, non-linear method, also 'QN' or 'Quasi-Newton'). See
+\code{\link{optim}} for details.}
+
+\item{fnscale}{Fitting is done on function/fnscale, where fnscale is already
+multiplied by -1 to make it an optimization where appropriate. By default it
+is set to 1. To make different schedules more comparable, use the largest
+deviation from zero in the schedule; fnscale=max(abs(schedule), na.rm=T).
+See \code{\link{optim}} for details.}
 }
 \value{
 The set of parameters that minimizes the difference between model
