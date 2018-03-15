@@ -74,7 +74,7 @@ one-process fit is requested, in which case only Rs and Ls are fit.
 }
 \examples{
 data("RotAdapt")
-param <- fitTwoRateReachModel(RotAdapt$reaches,RotAdapt$schedule)
+param <- fitTwoRateReachModel(RotAdapt$reaches,RotAdapt$schedule, method='BFGS')
 param
 
 tworatemodel <- twoRateReachModel(param, RotAdapt$schedule)

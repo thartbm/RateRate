@@ -72,7 +72,7 @@ NULL
 #'
 #' @examples
 #' data("RotAdapt")
-#' param <- fitTwoRateReachModel(RotAdapt$reaches,RotAdapt$schedule)
+#' param <- fitTwoRateReachModel(RotAdapt$reaches,RotAdapt$schedule, method='BFGS')
 #' param
 #'
 #' tworatemodel <- twoRateReachModel(param, RotAdapt$schedule)
@@ -198,7 +198,7 @@ fitTwoRateReachModel <- function( reaches,
     }
     if (method %in% c('BFGS','Quasi-Newton','QN')) {
       npars <- length(par)
-      control <- list('maxit'=10000, 'ndeps'=rep(1e-5, npars), 'reltol'=rep(1e-12, npars), 'fnscale'=1*fnscale )
+      control <- list('maxit'=10000, 'ndeps'=rep(1e-5, npars), 'reltol'=rep(1e-12, npars), 'fnscale'=fnscale )
       comboFit <- stats::optim(par=par, RateRate::twoRateReachModelErrors, gr=NULL, reaches, schedule, checkStability, method='BFGS', control=control)
       models[[comboNo]] <- comboFit$par
     }
