@@ -192,12 +192,13 @@ fitTwoRateReachModel <- function( reaches,
 
     if (method %in% c('NM','Nelder-Mead')) {
       # this could be more efficient:
-      control <- list('maxit'=10000, 'ndeps'=1e-16, 'fnscale'=1*fnscale )
-      comboFit <- stats::optim(par=par, RateRate::twoRateReachModelErrors, gr=NULL, reaches, schedule, checkStability, control=control)
+      control <- list('maxit'=10000, 'ndeps'=1e-5, 'reltol'=1e-12, 'fnscale'=1*fnscale )
+      comboFit <- stats::optim(par=par, RateRate::twoRateReachModelErrors, gr=NULL, reaches, schedule, checkStability, method='Nelder-Mead', control=control)
       models[[comboNo]] <- comboFit$par
     }
     if (method %in% c('BFGS','Quasi-Newton','QN')) {
-      control <- list('maxit'=10000, 'ndeps'=rep(1e-16, length(par)), 'fnscale'=-1*fnscale )
+      npars <- length(par)
+      control <- list('maxit'=10000, 'ndeps'=rep(1e-5, npars), 'reltol'=rep(1e-12, npars), 'fnscale'=1*fnscale )
       comboFit <- stats::optim(par=par, RateRate::twoRateReachModelErrors, gr=NULL, reaches, schedule, checkStability, method='BFGS', control=control)
       models[[comboNo]] <- comboFit$par
     }

@@ -127,8 +127,11 @@ double twoRateReachModelErrors(NumericVector par, NumericVector reaches, Numeric
 
   // first we check if the input parameters make sense
   // if not, we return infinity:
-  double inf = std::numeric_limits<double>::infinity();
+  // double inf = std::numeric_limits<double>::infinity();
 
+  // no, we return twice the error you'd get with an intercept model:
+  double inf = max(na_omit(abs(schedule)));
+  inf = inf * inf;
 
   // only evaluate rates if both its slow and fast version exist:
   // also check if each parameter is within bounds
