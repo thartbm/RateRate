@@ -1,5 +1,8 @@
 #include <Rcpp.h>
+//#include <cstdlib>
+#include <string.h>
 using namespace Rcpp;
+//using namespace std;
 
 // This is a simple example of exporting a C++ function to R. You can
 // source this function into an R session using the Rcpp::sourceCpp
@@ -19,61 +22,30 @@ using namespace Rcpp;
 //' @seealso \code{\link{fitTwoRateReachModel}} and \code{\link{twoRateReachModelErrors}}
 //' @export
 // [[Rcpp::export]]
-DataFrame twoRateReachModel(NumericVector par, NumericVector schedule) {
+DataFrame twoRateReachModel(NumericMatrix par, NumericVector schedule) {
 
   // number of values to pre allocate for output
   // and number of loop iterations
-  int n = schedule.size();
+  int ntrials = schedule.size();
+  int nproc = par.nrow();
 
-  // initialize the states:
-  float Xs_t0 = 0;
-  float Xf_t0 = 0;
+  NumericMatrix processes(ntrials, nproc+1);
 
-  // initialize other variables:
+  // initialize the states to 0:
+  NumericVector state(nproc, 0.0);
+  NumericVector output(ntrials, 0.0);
+
+  // initialize 'previous' error:
   float e_t0 = 0;
-  float Xs_t1 = 0;
-  float Xf_t1 = 0;
-  float X_t1 = 0;
 
-  // check if the fast and slow state are to be initialized at some value:
-  if(par.containsElementNamed("Is")) {
-    Xs_t0 = par["Is"];
-  }
-  if(par.containsElementNamed("If")) {
-    Xf_t0 = par["If"];
-  }
+  // initialize total state, so that new errors can be calculated:
+  float X_t0 = sum(state);
 
-  // only evaluate a process if both its retention and learning rate exist:
-  bool doslow = TRUE;
-  bool dofast = TRUE;
-  if(par.containsElementNamed("Rs")==FALSE) {
-    doslow = FALSE;
-  }
-  if(par.containsElementNamed("Ls")==FALSE) {
-    doslow = FALSE;
-  }
-  if(par.containsElementNamed("Rf")==FALSE) {
-    dofast = FALSE;
-  }
-  if(par.containsElementNamed("Lf")==FALSE) {
-    dofast = FALSE;
-  }
-
-  // initialize total state, so that errors can be calculated:
-  float X_t0 = Xs_t0 + Xf_t0;
-
-  // vectors will be combined into a dataframe at the end:
-  // IntegerVector a = df["a"];
-  NumericVector slow(n);
-  NumericVector fast(n);
-  NumericVector total(n);
-
-
-  for(int t = 0; t < n; ++t) {
+  for(int t = 0; t < ntrials; ++t) {
 
     // calculate previous error:
     if( NumericVector::is_na(schedule[t]) ) {
-      // if there is an NA, it was an error-calmped trial
+      // if there is an NA, it was an error-clamped trial
       // so the error should be zero
       e_t0 = 0;
     } else {
@@ -81,37 +53,39 @@ DataFrame twoRateReachModel(NumericVector par, NumericVector schedule) {
       e_t0 = -1 * (X_t0 + schedule[t]);
     }
 
-    // calculate current response:
-    if (doslow) {
-      Xs_t1 = (par["Rs"] * Xs_t0) + (par["Ls"] * e_t0);
-    } else {
-      Xs_t1 = 0;
-    }
-    if (dofast) {
-      Xf_t1 = (par["Rf"] * Xf_t0) + (par["Lf"] * e_t0);
-    } else {
-      Xf_t1 = 0;
-    }
+    // calculate current state:
+    state = (state * par(_,0)) + (e_t0 * par(_,1));
 
     // total output is the sum of the two processes:
-    X_t1 = Xs_t1 + Xf_t1;
+    X_t0 = sum(state);
 
-    // store values in the vectors:
-    slow[t] = Xs_t1;
-    fast[t] = Xf_t1;
-    total[t] = X_t1;
+    output(t) = X_t0;
 
-    // prepare for next iteration:
-    Xs_t0 = Xs_t1;
-    Xf_t0 = Xf_t1;
-    X_t0 = X_t1;
+    // this should put the whole state in the first p columns on row t of processes:
+    for (int p = 0; p < nproc; p++) {
+      processes(t,p) = state(p);
+    }
+
+    // and the sum of state in column p+1
+    processes(t,nproc) = X_t0;
 
   }
 
+  // create header names:
+  CharacterVector names(nproc + 1);
+  for (int i = 0; i < nproc; i++) {
+    names[i] = "p" + toString(i+1);
+  }
+  names[nproc] = "output";
+
   // return a new data frame
-  return DataFrame::create(_["slow"]= slow, _["fast"]= fast, _["total"]= total);
+  DataFrame result(processes);
+  result.attr("names") = names;
+  return(result);
 
 }
+
+// twoRateReachModel(matrix(data=c(.99,.75,.50,.15,.30,.45),ncol=2),c(rep(0,5),rep(10,25)))
 
 //' @title Return the Mean Squared Error Between a Two-Rate Model and a Dataset.
 //' @param par (NumericVector) named parameters (Ls, Rs, Lf, Rf).
