@@ -6,12 +6,12 @@
 using namespace Rcpp;
 
 // twoRateReachModel
-DataFrame twoRateReachModel(NumericVector par, NumericVector schedule);
+DataFrame twoRateReachModel(NumericMatrix par, NumericVector schedule);
 RcppExport SEXP _RateRate_twoRateReachModel(SEXP parSEXP, SEXP scheduleSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type par(parSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type par(parSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type schedule(scheduleSEXP);
     rcpp_result_gen = Rcpp::wrap(twoRateReachModel(par, schedule));
     return rcpp_result_gen;

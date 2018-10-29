@@ -1,8 +1,6 @@
 #include <Rcpp.h>
-//#include <cstdlib>
 #include <string.h>
 using namespace Rcpp;
-//using namespace std;
 
 // This is a simple example of exporting a C++ function to R. You can
 // source this function into an R session using the Rcpp::sourceCpp
@@ -76,7 +74,7 @@ DataFrame twoRateReachModel(NumericMatrix par, NumericVector schedule) {
   for (int i = 0; i < nproc; i++) {
     names[i] = "p" + toString(i+1);
   }
-  names[nproc] = "output";
+  names[nproc] = "total";
 
   // return a new data frame
   DataFrame result(processes);
@@ -106,6 +104,10 @@ double twoRateReachModelErrors(NumericVector par, NumericVector reaches, Numeric
   // no, we return twice the error you'd get with an intercept model:
   double inf = max(na_omit(abs(schedule)));
   inf = inf * inf;
+
+  NumericMatrix par2(par.size() / 2, 2);
+  //NumericMatrix par2
+
 
   // only evaluate rates if both its slow and fast version exist:
   // also check if each parameter is within bounds
@@ -195,10 +197,16 @@ double twoRateReachModelErrors(NumericVector par, NumericVector reaches, Numeric
       return(inf);
     }
 
+    par2(0,0) = Rs;
+    par2(1,0) = Rf;
+    par2(0,1) = Ls;
+    par2(1,1) = Lf;
+
   }
 
+
   // parameters checked, we can now evaluate the model with the parameters
-  DataFrame model = twoRateReachModel(par, schedule);
+  DataFrame model = twoRateReachModel(par2, schedule);
   // get only the total model output
   NumericVector total = model["total"];
   // these are the errors of the model in predicting the behavior for each trial:
